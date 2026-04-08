@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Video Summarizer</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg,#0f0c29,#302b63,#24243e);
+      color: white;
+      overflow-x: hidden;
+    }
+    a { text-decoration: none; color: inherit; }
+    .btn-glow { background: linear-gradient(90deg,#ff8a00,#e52e71); color:white; border:none; border-radius:50px; font-weight:600; padding:10px 30px; }
+    .btn-glow:hover { opacity:0.9; }
+
+    .navbar { backdrop-filter: blur(10px); background: rgba(0,0,0,0.3); }
+    .dropdown-menu { background: rgba(0,0,0,0.8); }
+
+    #sidebar { position: fixed; left: -250px; top:0; width:250px; height:100%; background: #1a1a2e; transition: 0.3s; z-index: 9999; padding-top: 60px; }
+    #sidebar.active { left:0; }
+    #sidebar .nav-link { color: #fff; padding: 15px 20px; display:flex; align-items:center; }
+    #sidebar .nav-link i { margin-right:10px; }
+    #sidebar .nav-link:hover { background: rgba(255,255,255,0.1); border-radius:8px; }
+    #sidebar-toggle { position: fixed; left:10px; top:15px; font-size:24px; cursor:pointer; z-index:10000; }
+
+    #hero { padding:120px 20px 80px 20px; text-align:center; }
+    #hero h1 { font-size:3rem; background: linear-gradient(90deg,#ff8a00,#e52e71); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    #hero p { font-size:1.2rem; margin-bottom:20px; }
+    #hero input[type=text] { width:60%; padding:15px 20px; border-radius:50px; border:none; }
+
+    #features .card {
+  background: rgba(255,255,255,0.05);
+  border-radius:15px;
+  padding:20px;
+  transition:0.3s;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+#features .card h5 {
+  color: white !important;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+#features .card p {
+  color: rgba(255,255,255,0.7) !important;
+  font-size: 0.9rem;
+}
+    #features .card:hover { transform: translateY(-10px); box-shadow:0 10px 25px rgba(0,0,0,0.3); }
+    #features i { font-size:2rem; margin-bottom:15px; color:#ff8a00; }
+
+    #how-it-works .step { text-align:center; padding:20px; }
+    #how-it-works .step i { font-size:3rem; color:#e52e71; margin-bottom:10px; }
+
+    #cta { background: linear-gradient(90deg,#ff8a00,#e52e71); text-align:center; padding:60px 20px; border-radius:15px; margin-top:50px; }
+
+    footer { margin-top:50px; padding:20px 0; text-align:center; font-size:14px; opacity:0.7; }
+  </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div id="sidebar">
+  <a class="nav-link" href="/dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a>
+  <a class="nav-link" href="#hero"><i class="bi bi-play-btn"></i> Summarize Video</a>
+  <a class="nav-link" href="/progress"><i class="bi bi-graph-up"></i> Progress</a>
+  <a class="nav-link" href="/history"><i class="bi bi-clock-history"></i> History</a>
+  <a class="nav-link" href="/notes"><i class="bi bi-journal-text"></i> Saved Notes</a>
+  <a class="nav-link" href="#"><i class="bi bi-gear"></i> Settings</a>
+</div>
+<div id="sidebar-toggle"><i class="bi bi-list"></i></div>
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg navbar-dark px-4 fixed-top">
+  <a class="navbar-brand fw-bold" href="#">🤖 AI Video Summarizer</a>
+  <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="navMenu">
+    <ul class="navbar-nav ms-auto">
+      <li class="nav-item"><a class="nav-link" href="#hero">Home</a></li>
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Features</a>
+        <ul class="dropdown-menu">
+          <li><a class="dropdown-item" href="#">Video Summarization</a></li>
+          <li><a class="dropdown-item" href="#">Key Points Generator</a></li>
+          <li><a class="dropdown-item" href="#">Quiz Generator</a></li>
+          <li><a class="dropdown-item" href="#">Notes Maker</a></li>
+        </ul>
+      </li>
+      <li class="nav-item"><a class="nav-link" href="#how-it-works">How It Works</a></li>
+      <li class="nav-item"><a class="nav-link" href="#about">About</a></li>
+      <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
+      <li class="nav-item ms-3"><a class="btn btn-glow" href="#hero">Try Now</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="hero" class="container">
+  <h1>Turn YouTube Videos into Smart Study Notes</h1>
+  <p>Summaries, key points, quizzes and notes — powered by AI</p>
+
+  <!-- ✅ ERROR MESSAGE SHOWS HERE -->
+  {% if error %}
+  <div class="alert alert-danger mt-3 mx-auto" style="max-width:600px; border-radius:15px;">
+    {{ error }}
+  </div>
+  {% endif %}
+
+  <form action="/summarize" method="POST" class="d-flex justify-content-center mt-4">
+    <input type="text" name="youtube_link" placeholder="Paste YouTube link here..." required>
+    <button class="btn btn-glow ms-2" type="submit">Generate Summary</button>
+  </form>
+</section>
+
+<!-- FEATURES -->
+<section id="features" class="container py-5">
+  <h2 class="text-center mb-5">Powerful Features</h2>
+  <div class="row g-4">
+    <div class="col-md-4"><div class="card text-center"><i class="bi bi-film"></i><h5>AI Video Summary</h5><p>Summarize videos automatically.</p></div></div>
+    <div class="col-md-4"><div class="card text-center"><i class="bi bi-journal-text"></i><h5>Bullet Point Notes</h5><p>Get clear bullet points.</p></div></div>
+    <div class="col-md-4"><div class="card text-center"><i class="bi bi-question-circle"></i><h5>Auto Quiz Generator</h5><p>Test your knowledge.</p></div></div>
+    <div class="col-md-4"><div class="card text-center"><i class="bi bi-lightbulb"></i><h5>Key Topic Extraction</h5><p>Highlight important topics.</p></div></div>
+    <div class="col-md-4"><div class="card text-center"><i class="bi bi-download"></i><h5>Download as PDF</h5><p>Save notes offline.</p></div></div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how-it-works" class="container py-5">
+  <h2 class="text-center mb-5">How It Works</h2>
+  <div class="row text-center g-4">
+    <div class="col-md-3 step"><i class="bi bi-link-45deg"></i><h5>Paste YouTube Link</h5></div>
+    <div class="col-md-3 step"><i class="bi bi-mic"></i><h5>AI Converts Speech to Text</h5></div>
+    <div class="col-md-3 step"><i class="bi bi-file-text"></i><h5>Summary & Notes Generated</h5></div>
+    <div class="col-md-3 step"><i class="bi bi-download"></i><h5>Download or Study Online</h5></div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about" class="container py-5">
+  <h2 class="text-center mb-4">About</h2>
+  <p class="text-center">This AI-powered system helps students and learners quickly understand long YouTube videos by converting them into structured summaries, notes, and quizzes.</p>
+</section>
+
+<!-- CALL TO ACTION -->
+<section id="cta" class="container my-5">
+  <h2>Start Learning Smarter Today</h2>
+  <a href="#hero" class="btn btn-dark btn-lg mt-3">Summarize a Video Now</a>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p>Quick Links | Social Icons | © 2026 AI Video Summarizer</p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  const sidebar = document.getElementById('sidebar');
+  const toggle = document.getElementById('sidebar-toggle');
+  toggle.addEventListener('click', () => { sidebar.classList.toggle('active'); });
+</script>
+
+</body>
+</html>

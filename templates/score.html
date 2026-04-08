@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz Results | AI Video Summarizer</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg,#0f0c29,#302b63,#24243e);
+      color: white;
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+
+    /* SCORE HERO */
+    .score-hero {
+      text-align: center;
+      margin-bottom: 50px;
+      animation: fadeInDown 0.6s ease forwards;
+    }
+    .score-circle {
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      background: linear-gradient(135deg,#ff8a00,#e52e71);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 25px auto;
+      box-shadow: 0 0 40px rgba(255,138,0,0.4);
+      animation: popIn 0.6s ease forwards;
+    }
+    .score-circle .score-num {
+      font-size: 3rem;
+      font-weight: 800;
+      color: white;
+      line-height: 1;
+    }
+    .score-circle .score-total {
+      font-size: 0.9rem;
+      color: rgba(255,255,255,0.8);
+    }
+    .score-hero h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .score-hero p { color: rgba(255,255,255,0.5); font-size: 1rem; }
+
+    /* EMOJI FEEDBACK */
+    .feedback-badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 50px;
+      padding: 8px 20px;
+      font-size: 1rem;
+      margin-top: 15px;
+    }
+
+    /* STATS ROW */
+    .stats-row {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-bottom: 40px;
+      flex-wrap: wrap;
+    }
+    .mini-stat {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 15px;
+      padding: 15px 25px;
+      text-align: center;
+      min-width: 120px;
+    }
+    .mini-stat .num {
+      font-size: 1.8rem;
+      font-weight: 700;
+    }
+    .mini-stat .lbl { font-size: 0.78rem; color: rgba(255,255,255,0.45); margin-top: 4px; }
+    .correct-num { color: #4ade80; }
+    .wrong-num { color: #f87171; }
+
+    /* RESULTS */
+    .results-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      background: linear-gradient(90deg,#ff8a00,#e52e71);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      max-width: 700px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .result-card {
+      background: rgba(255,255,255,0.04);
+      border-radius: 16px;
+      padding: 20px 25px;
+      margin-bottom: 15px;
+      max-width: 700px;
+      margin-left: auto;
+      margin-right: auto;
+      border-left: 4px solid transparent;
+      animation: fadeInUp 0.4s ease forwards;
+      opacity: 0;
+      transition: 0.3s;
+    }
+    .result-card:hover { transform: translateX(5px); }
+    .result-card.correct { border-left-color: #4ade80; background: rgba(74,222,128,0.05); }
+    .result-card.wrong { border-left-color: #f87171; background: rgba(248,113,113,0.05); }
+
+    .result-question {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: white;
+      margin-bottom: 12px;
+    }
+    .answer-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      font-size: 0.85rem;
+    }
+    .answer-chip {
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-weight: 500;
+    }
+    .chip-selected-correct { background: rgba(74,222,128,0.15); color: #4ade80; border: 1px solid rgba(74,222,128,0.3); }
+    .chip-selected-wrong { background: rgba(248,113,113,0.15); color: #f87171; border: 1px solid rgba(248,113,113,0.3); }
+    .chip-correct { background: rgba(74,222,128,0.1); color: #4ade80; border: 1px solid rgba(74,222,128,0.2); }
+
+    /* BUTTONS */
+    .actions-wrap {
+      text-align: center;
+      margin-top: 40px;
+      padding-bottom: 50px;
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .btn-glow {
+      background: linear-gradient(90deg,#ff8a00,#e52e71);
+      color: white; border: none;
+      border-radius: 50px;
+      padding: 13px 30px;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-block;
+      transition: 0.2s;
+    }
+    .btn-glow:hover { opacity: 0.88; color: white; transform: translateY(-2px); }
+    .btn-outline {
+      background: transparent;
+      color: rgba(255,255,255,0.6);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 50px;
+      padding: 13px 30px;
+      font-weight: 500;
+      text-decoration: none;
+      display: inline-block;
+      transition: 0.2s;
+    }
+    .btn-outline:hover { background: rgba(255,255,255,0.08); color: white; }
+
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes popIn {
+      0% { transform: scale(0.5); opacity: 0; }
+      70% { transform: scale(1.1); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- SCORE HERO -->
+  <div class="score-hero">
+    <div class="score-circle">
+      <div class="score-num">{{ score }}</div>
+      <div class="score-total">out of {{ total }}</div>
+    </div>
+
+    {% set percent = (score / total * 100) | int %}
+    {% if percent == 100 %}
+      <h1>🏆 Perfect Score!</h1>
+      <p>Absolutely brilliant! You nailed every question!</p>
+      <div class="feedback-badge">🌟 Outstanding Performance</div>
+    {% elif percent >= 80 %}
+      <h1>🎉 Excellent Work!</h1>
+      <p>Great job! You really understood the video well!</p>
+      <div class="feedback-badge">👏 Well Done</div>
+    {% elif percent >= 60 %}
+      <h1>👍 Good Effort!</h1>
+      <p>Not bad! A little more focus and you'll ace it!</p>
+      <div class="feedback-badge">📚 Keep Learning</div>
+    {% else %}
+      <h1>💪 Keep Trying!</h1>
+      <p>Don't give up! Watch the video again and retry!</p>
+      <div class="feedback-badge">🔄 Try Again</div>
+    {% endif %}
+  </div>
+
+  <!-- MINI STATS -->
+  <div class="stats-row">
+    <div class="mini-stat">
+      <div class="num correct-num">{{ score }}</div>
+      <div class="lbl">✅ Correct</div>
+    </div>
+    <div class="mini-stat">
+      <div class="num wrong-num">{{ total - score }}</div>
+      <div class="lbl">❌ Wrong</div>
+    </div>
+    <div class="mini-stat">
+      <div class="num" style="color:#ff8a00;">{{ percent }}%</div>
+      <div class="lbl">🎯 Score</div>
+    </div>
+  </div>
+
+  <!-- RESULTS BREAKDOWN -->
+  <p class="results-title">📋 Question Breakdown</p>
+
+  {% for r in results %}
+  <div class="result-card {{ 'correct' if r.is_correct else 'wrong' }}" style="animation-delay: {{ loop.index0 * 0.1 }}s;">
+    <p class="result-question">Q{{ loop.index }}. {{ r.question }}</p>
+    <div class="answer-row">
+      {% if r.is_correct %}
+        <span class="answer-chip chip-selected-correct">✅ {{ r.selected }}</span>
+      {% else %}
+        <span class="answer-chip chip-selected-wrong">❌ Your answer: {{ r.selected }}</span>
+        <span class="answer-chip chip-correct">✅ Correct: {{ r.correct }}</span>
+      {% endif %}
+    </div>
+  </div>
+  {% endfor %}
+
+  <!-- BUTTONS -->
+  <div class="actions-wrap">
+    <a href="/quiz" class="btn-glow">🔄 Try Again</a>
+    <a href="/" class="btn-outline">🏠 Back to Home</a>
+  </div>
+
+</div>
+
+</body>
+</html>

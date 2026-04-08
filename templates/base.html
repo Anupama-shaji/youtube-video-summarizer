@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Lume Summarize</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gradient-to-br from-[#0F172A] via-[#1E293B] to-[#312E81] text-white">
+
+<div class="flex min-h-screen">
+
+    <!-- SIDEBAR -->
+    <aside class="w-64 bg-[#020617] p-6 space-y-6">
+        <h1 class="text-2xl font-bold">Lume</h1>
+
+        <nav class="space-y-4 text-gray-300">
+            <a href="/" class="block hover:text-white">📊 Dashboard</a>
+            <a href="/" class="block hover:text-white">🎥 Summarize Video</a>
+            <a href="/history" class="block hover:text-white">🕘 History</a>
+            <a href="#" class="block hover:text-white">📝 Saved Notes</a>
+            <a href="#" class="block hover:text-white">⚙ Settings</a>
+        </nav>
+    </aside>
+
+    <!-- MAIN -->
+    <div class="flex-1 flex flex-col">
+
+        <!-- TOP NAV -->
+        <header class="flex justify-between items-center px-10 py-6">
+            <nav class="space-x-6 text-sm text-gray-300">
+                <a href="/" class="hover:text-white">Home</a>
+                <a href="#" class="hover:text-white">Features</a>
+                <a href="#" class="hover:text-white">How it Works</a>
+                <a href="#" class="hover:text-white">About</a>
+                <a href="#" class="hover:text-white">Contact</a>
+            </nav>
+
+            <button class="bg-gradient-to-r from-orange-500 to-pink-500 px-6 py-2 rounded-full font-semibold">
+                Try Now
+            </button>
+        </header>
+
+        <!-- PAGE CONTENT -->
+        <main class="px-16 py-10">
+            {% block content %}{% endblock %}
+        </main>
+
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz | AI Video Summarizer</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg,#0f0c29,#302b63,#24243e);
+      color: white;
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+
+    .page-header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    .page-header h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      background: linear-gradient(90deg,#ff8a00,#e52e71);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .page-header p { color: rgba(255,255,255,0.5); margin-top: 8px; }
+
+    /* PROGRESS BAR */
+    .progress-wrap {
+      max-width: 700px;
+      margin: 0 auto 30px auto;
+    }
+    .progress-info {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.5);
+      margin-bottom: 8px;
+    }
+    .progress {
+      height: 8px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .progress-bar {
+      background: linear-gradient(90deg,#ff8a00,#e52e71);
+      border-radius: 10px;
+      transition: width 0.5s ease;
+    }
+
+    /* QUESTION CARDS */
+    .question-card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 20px;
+      padding: 30px;
+      margin-bottom: 25px;
+      max-width: 700px;
+      margin-left: auto;
+      margin-right: auto;
+      animation: fadeInUp 0.5s ease forwards;
+      opacity: 0;
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .question-num {
+      display: inline-block;
+      background: linear-gradient(90deg,#ff8a00,#e52e71);
+      color: white;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 4px 14px;
+      border-radius: 20px;
+      margin-bottom: 15px;
+    }
+
+    .question-text {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: white;
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+
+    /* OPTIONS */
+    .option-label {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 18px;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: 0.25s;
+      color: rgba(255,255,255,0.8);
+      font-size: 0.95rem;
+    }
+    .option-label:hover {
+      background: rgba(255,138,0,0.1);
+      border-color: rgba(255,138,0,0.4);
+      color: white;
+      transform: translateX(5px);
+    }
+    .option-label input[type="radio"] { display: none; }
+    .option-label input[type="radio"]:checked + .option-circle {
+      background: linear-gradient(90deg,#ff8a00,#e52e71);
+      border-color: transparent;
+    }
+    .option-label:has(input:checked) {
+      background: rgba(255,138,0,0.12);
+      border-color: rgba(255,138,0,0.5);
+      color: white;
+    }
+    .option-circle {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.3);
+      flex-shrink: 0;
+      transition: 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .option-circle::after {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: white;
+      display: none;
+    }
+    input[type="radio"]:checked ~ .option-circle::after { display: block; }
+
+    /* SUBMIT */
+    .submit-wrap {
+      text-align: center;
+      margin-top: 30px;
+      padding-bottom: 50px;
+    }
+    .btn-glow {
+      background: linear-gradient(90deg,#ff8a00,#e52e71);
+      color: white; border: none;
+      border-radius: 50px;
+      padding: 14px 45px;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: 0.2s;
+      box-shadow: 0 5px 20px rgba(255,138,0,0.3);
+    }
+    .btn-glow:hover { opacity: 0.88; transform: translateY(-2px); }
+    .btn-outline {
+      background: transparent;
+      color: rgba(255,255,255,0.6);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 50px;
+      padding: 14px 35px;
+      font-weight: 500;
+      text-decoration: none;
+      display: inline-block;
+      transition: 0.2s;
+      margin-right: 15px;
+    }
+    .btn-outline:hover { background: rgba(255,255,255,0.08); color: white; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="page-header">
+    <h1>📝 Quiz Time!</h1>
+    <p>Test your knowledge from the video</p>
+  </div>
+
+  <!-- PROGRESS BAR -->
+  <div class="progress-wrap">
+    <div class="progress-info">
+      <span>Progress</span>
+      <span id="progressText">0 / {{ quiz|length }} answered</span>
+    </div>
+    <div class="progress">
+      <div class="progress-bar" id="progressBar" style="width: 0%;"></div>
+    </div>
+  </div>
+
+  <!-- QUIZ FORM -->
+  <form action="/submit_quiz" method="POST" id="quizForm">
+    {% for i, q in quiz %}
+    <div class="question-card" style="animation-delay: {{ i * 0.1 }}s;">
+      <span class="question-num">Question {{ i + 1 }} of {{ quiz|length }}</span>
+      <p class="question-text">{{ q.question }}</p>
+
+      {% for option in q.options %}
+      <label class="option-label">
+        <input type="radio" name="q{{ i }}" value="{{ option }}" required onchange="updateProgress()">
+        <div class="option-circle"></div>
+        {{ option }}
+      </label>
+      {% endfor %}
+    </div>
+    {% endfor %}
+
+    <!-- BUTTONS -->
+    <div class="submit-wrap">
+      <a href="/" class="btn-outline">⬅ Back</a>
+      <button type="submit" class="btn-glow">Submit Quiz 🚀</button>
+    </div>
+  </form>
+
+</div>
+
+<script>
+  const total = {{ quiz|length }};
+
+  function updateProgress() {
+    const answered = document.querySelectorAll('input[type="radio"]:checked').length;
+    const percent = (answered / total) * 100;
+    document.getElementById('progressBar').style.width = percent + '%';
+    document.getElementById('progressText').textContent = answered + ' / ' + total + ' answered';
+  }
+</script>
+
+</body>
+</html>
